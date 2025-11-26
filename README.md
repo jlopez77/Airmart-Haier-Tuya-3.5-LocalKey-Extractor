@@ -32,7 +32,7 @@ which do not expose their local keys through Tuya IoT.
 
 1. Install Android Studio
 2. Create an Android 13 ARM64 emulator
-3. Install the official Haier/Airmart app
+3. Install the official Haier/Airmart app (Intelligent Air for the Airmart ACs)
 4. Install Frida-Server in the emulator
 5. Run:
 

@@ -13,5 +13,7 @@ Install Frida server:
 
 
 adb push frida-server-17.5.1-android-arm64 /data/local/tmp/frida-server
+
 adb shell "chmod 755 /data/local/tmp/frida-server"
+
 adb shell "/data/local/tmp/frida-server &"

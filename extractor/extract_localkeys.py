@@ -1,29 +1,30 @@
 # extract_localkeys.py
+# Orchestrates adb + frida + hook script to extract Tuya 3.5 localKey
 
-import subprocess
-import time
 import os
+import time
+from adb_helpers import wait_for_device, push_frida_server, start_frida_server, launch_app
+from frida_launcher import inject
 
+PACKAGE = "com.aircondition.smart"   # Change if needed
 SCRIPT = os.path.join(os.path.dirname(__file__), "frida", "hook_localkeys.js")
 
-def run(cmd):
-    return subprocess.check_output(cmd, shell=True, text=True)
-
 def main():
-    print("🔄 Restarting frida-server in emulator...")
-    run("adb shell pkill frida-server || true")
-    run("adb shell /data/local/tmp/frida-server &")
-    time.sleep(1)
+    print("=== Tuya 3.5 LocalKey Extractor ===\n")
 
-    print("📱 Launching the target app...")
-    run("adb shell monkey -p com.aircondition.smart -c android.intent.category.LAUNCHER 1")
-    time.sleep(2)
+    wait_for_device()
 
-    print("🧪 Injecting Frida script...\n")
+    # Ensure frida-server is on the emulator
+    push_frida_server()
 
-    cmd = f"frida -U -f com.aircondition.smart -l {SCRIPT}"
-    print("⚡ Now *use the app normally* to trigger LocalKey loading...\n")
-    os.system(cmd)
+    # Start frida-server
+    start_frida_server()
+
+    # Launch the Airmart/Haier app
+    launch_app(PACKAGE)
+
+    # Inject Frida script and print keys
+    inject(PACKAGE, SCRIPT)
 
 if __name__ == "__main__":
     main()

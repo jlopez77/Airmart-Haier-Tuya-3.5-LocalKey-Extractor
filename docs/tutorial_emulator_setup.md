@@ -6,9 +6,7 @@
    - Android 13 (API 33)
    - ARM64 image
 3. Boot the emulator
-4. Install the Haier/Airmart APK:
-nginx
-Copiar código
+4. Download from apkpure & Install the Haier/Airmart APK (Intelligent AC):
 adb install APP.apk
 Install Frida server:
 

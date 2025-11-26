@@ -41,7 +41,9 @@ python extractor/extract_localkeys.py
 Example output:
 
 [KEY] bf2bbc01486531b8942uho = ZwT(dgeE][f07_Vc
+
 [KEY] bf76f636ff6f0b420fllmo = HyDbylnt7biqI$Yr
+
 [KEY] bfa0a38a8dd580dcd7a1n = !6LnGCaT'bsfeQ9?
 
 Copy these into Home Assistant → Tuya Local (https://github.com/make-all/tuya-local) → and the device works 100% LAN only.

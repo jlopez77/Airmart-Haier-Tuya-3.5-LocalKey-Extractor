@@ -36,3 +36,28 @@ which do not expose their local keys through Tuya IoT.
 4. Install Frida-Server in the emulator
 5. Run:
 
+python extractor/extract_localkeys.py
+
+Example output:
+
+[KEY] bf2bbc01486531b8942uho = ZwT(dgeE][f07_Vc
+[KEY] bf76f636ff6f0b420fllmo = HyDbylnt7biqI$Yr
+[KEY] bfa0a38a8dd580dcd7a1n = !6LnGCaT'bsfeQ9?
+
+Copy these into Home Assistant → Tuya Local (https://github.com/make-all/tuya-local) → and the device works 100% LAN only.
+
+---
+
+## 📁 Project Structure
+
+extractor/
+hook_localkeys.js # Frida script that hooks DeviceBean.getLocalKey()
+extract_localkeys.py # Automated runner
+frida_launcher.py # Utility to launch frida-server + inject the script
+adb_helpers.py # ADB utilities
+
+---
+
+## 📝 License
+
+MIT License.

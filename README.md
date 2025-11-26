@@ -53,10 +53,15 @@ Copy these into Home Assistant → Tuya Local (https://github.com/make-all/tuya-
 ## 📁 Project Structure
 
 extractor/
+
 hook_localkeys.js # Frida script that hooks DeviceBean.getLocalKey()
+
 extract_localkeys.py # Automated runner
+
 frida_launcher.py # Utility to launch frida-server + inject the script
+
 adb_helpers.py # ADB utilities
+
 
 ---
 

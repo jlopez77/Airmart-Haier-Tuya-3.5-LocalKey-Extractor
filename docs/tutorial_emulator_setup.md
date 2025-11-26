@@ -8,10 +8,10 @@
 3. Boot the emulator
 4. Download from apkpure & Install the Haier/Airmart APK (Intelligent AC):
 adb install APP.apk
+
 Install Frida server:
 
-pgsql
-Copiar código
+
 adb push frida-server-17.5.1-android-arm64 /data/local/tmp/frida-server
 adb shell "chmod 755 /data/local/tmp/frida-server"
 adb shell "/data/local/tmp/frida-server &"

@@ -198,5 +198,102 @@ You should see the same (or very close) version number.
 If both checks return a version number →  
 🎉 **STEP 2 is fully complete.**
 
+# ✅ STEP 3 — Create an Android Emulator & Verify ADB Detection
+
+We now create a clean Android environment where we will later run  
+**frida-server** and install the **com.aircondition.smart** app.
+
+This step works the same on **macOS / Windows / Linux**.
+
+---
+
+## 3.1 Open Android Studio → Device Manager
+
+1. Launch **Android Studio**.
+2. On the welcome screen select:  
+   **More Actions → Device Manager**  
+   *(If a project is open: Tools → Device Manager)*
+
+3. Click **Create Device**.
+
+---
+
+## 3.2 Choose an Emulator Device
+
+Recommended:
+
+- **Pixel 6** or **Pixel 4**
+- **Android 11 (R)** or **Android 12 (S)**  
+  (Both work perfectly with Frida.)
+
+Avoid:
+
+- Android 13/14 images (some restrictions).
+- ARM images on Intel CPUs (too slow).
+
+If possible:
+
+- Prefer **x86_64** image (fastest).
+- If using Apple Silicon, prefer **arm64-v8a**.
+
+Click **Next** → download image if needed → **Finish**.
+
+---
+
+## 3.3 Start the Emulator
+
+In Device Manager:
+
+- Click the **▶ Play** button next to your virtual device.
+
+Wait until Android fully boots.
+
+---
+
+## 3.4 Verify the Emulator with ADB
+
+Open a terminal and run:
+
+```
+adb devices
+```
+
+Expected output:
+
+```
+List of devices attached
+emulator-5554 device
+```
+
+If your output contains at least one line like:
+
+- `emulator-5554 device`
+- `emulator-xxxx device`
+
+→ The emulator is detected correctly.
+
+---
+
+## 3.5 (Optional) Restart ADB if the device doesn't appear
+
+If you see `unauthorized` or nothing shows up:
+
+```
+adb kill-server
+adb start-server
+adb devices
+```
+
+If still not appearing, close the emulator and start it again.
+
+---
+
+🎉 **STEP 3 is complete when:**
+
+- The emulator boots.
+- `adb devices` shows the emulator as `device`.
+
+
+
 
 

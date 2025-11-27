@@ -40,55 +40,55 @@ STEP 1 — Install Android Studio + ADB (Platform-Tools)
 
 This step ensures:
 
-Android Studio installed
+- Android Studio installed
 
-SDK + Platform-Tools installed
+- SDK + Platform-Tools installed
 
-adb works globally
+- adb works globally
 
-1. Download & Install Android Studio
+# 1. Download & Install Android Studio
 
-macOS / Windows / Linux
+- macOS / Windows / Linux
 Download from the official Android Studio website and install normally.
 
 No custom configuration needed.
 
-2. Open Android Studio and install SDK components
+# 2. Open Android Studio and install SDK components
 
-Launch Android Studio.
+- Launch Android Studio.
 
-On the welcome screen click:
-More Actions → SDK Manager
-(If a project is open: File → Settings → Android SDK)
+- On the welcome screen click:
+More Actions → SDK Manager (If a project is open: File → Settings → Android SDK)
 
-In SDK Platforms:
+- In SDK Platforms:
 
 Select any Android version, ideally Android 11 or 12.
 
 Click Apply → wait for download.
 
-Go to SDK Tools tab:
+- Go to SDK Tools tab:
 
 Check Android SDK Platform-Tools
 
 (Optional but recommended) check:
 
-Android Emulator
+- Android Emulator
 
-Android SDK Build-Tools
+- Android SDK Build-Tools
 
 Click Apply → OK
 
 This installs:
 
-adb
+- adb
 
-Emulator system
+- Emulator system
 
-Essential build tools
+- Essential build tools
 
-3. Ensure adb is available from terminal
-macOS / Linux:
+# 3. Ensure adb is available from terminal
+
+- macOS / Linux:
 
 If Android Studio added it to PATH automatically, this works:
 
@@ -106,7 +106,7 @@ To make it persistent:
 echo 'export PATH=$PATH:$HOME/Library/Android/sdk/platform-tools' >> ~/.zshrc
 source ~/.zshrc
 
-Windows:
+- Windows:
 
 Check:
 
@@ -117,7 +117,7 @@ If it fails, add this to PATH:
 
 C:\Users\<YOUR_USER>\AppData\Local\Android\Sdk\platform-tools
 
-4. Verify ADB is working
+# 4. Verify ADB is working
 
 Run:
 
@@ -129,7 +129,7 @@ Expected output:
 Android Debug Bridge version x.y.z
 
 
-If you see this → Step 1 is fully complete ✔️
+## If you see this → Step 1 is fully complete ✔️
 
 
 

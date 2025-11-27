@@ -294,6 +294,146 @@ If still not appearing, close the emulator and start it again.
 - `adb devices` shows the emulator as `device`.
 
 
+# ✅ STEP 4 — Install **frida-server** on the Android Emulator
+
+Now that the emulator is running and ADB detects it, we install  
+**frida-server** inside the device.  
+This is required for hooking the app later.
+
+---
+
+# 4.1 Determine the Emulator CPU Architecture
+
+In your terminal:
+
+```
+adb shell getprop ro.product.cpu.abi
+```
+
+Typical outputs:
+
+- `x86_64` → emulator using Intel/AMD image
+- `arm64-v8a` → emulator using ARM image (Apple Silicon or ARM-based image)
+
+Remember this value — you need the matching frida-server binary.
+
+---
+
+# 4.2 Download the Matching frida-server
+
+1. Run on your PC:
+
+```
+frida --version
+```
+
+Example output:
+
+```
+16.5.6
+```
+
+2. Go to the official Frida releases page.
+
+3. Download the file:
+
+```
+frida-server-<VERSION>-android-<ABI>.xz
+```
+
+For example:
+
+- `frida-server-16.5.6-android-x86_64.xz`  
+- `frida-server-16.5.6-android-arm64.xz`
+
+4. Extract the `.xz` file:
+
+**macOS / Linux:**
+```
+xz -d frida-server-<VERSION>-android-<ABI>.xz
+```
+
+**Windows:**
+Use 7-Zip to extract the file.
+
+After extraction you should have a file like:
+
+```
+frida-server-16.5.6-android-x86_64
+```
+
+---
+
+# 4.3 Push frida-server to the Emulator
+
+Run:
+
+```
+adb root
+adb push frida-server-<VERSION>-android-<ABI> /data/local/tmp/frida-server
+adb shell chmod 755 /data/local/tmp/frida-server
+```
+
+`adb root` should work automatically on Android emulators  
+(it does **not** work on physical unrooted phones).
+
+---
+
+# 4.4 Start frida-server inside the Emulator
+
+Run:
+
+```
+adb shell /data/local/tmp/frida-server &
+```
+
+This launches frida-server in the background.
+
+---
+
+# 4.5 Verify frida-server is Running
+
+On your PC:
+
+```
+frida-ps -U
+```
+
+Expected output: a list of running Android processes, for example:
+
+```
+PID Name
+
+123 system_server
+456 com.android.settings
+789 com.android.systemui
+```
+
+If you see processes listed → **frida-server is working** 🎉
+
+If you get:
+
+- `Failed to enumerate processes`  
+- or `Timed out while waiting for the connection`
+
+Then try restarting:
+
+```
+adb kill-server
+adb start-server
+adb shell /data/local/tmp/frida-server &
+frida-ps -U
+```
+
+🎉 **STEP 4 is now complete** when:
+
+- The emulator is running
+- frida-server is installed and executable
+- `frida-ps -U` lists processes
+
+---
+
+
 
 
 

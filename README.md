@@ -861,28 +861,39 @@ Java.perform(function () {
                     clsName = clazz.getName();
                 } catch (e) {}
 
-                // Only log relevant classes to avoid too much noise
+                // Only care about ApiResponeBean
                 if (clsName === "com.thingclips.smart.android.network.bean.ApiResponeBean") {
-                    // Send JSON to host (Python or CLI)
-                    send({
-                        type: "apiResp",
-                        className: clsName,
-                        json: text
-                    });
+                    try {
+                        var obj = JSON.parse(text);
+                        var api = obj.a;
+
+                        // This is the one with devId + localKey
+                        if (api === "m.life.my.group.device.list") {
+                            console.log("==== Device list (m.life.my.group.device.list) ====");
+                            (obj.result || []).forEach(function (dev) {
+                                console.log(
+                                    "Name:", dev.name,
+                                    "| devId:", dev.devId,
+                                    "| localKey:", dev.localKey
+                                );
+                            });
+                            console.log("==================================================");
+                        }
+                    } catch (e) {
+                        console.log("[Frida] JSON.parse error:", e);
+                    }
                 }
 
                 return this.parseObject(text, clazz);
             };
 
-        console.log("[Frida] Hooked fastjson.JSON.parseObject(String, Class)");
+        console.log("[Frida] fastjson hook for device list installed");
 
     } catch (e) {
-        console.log("[Frida] Error hooking fastjson.JSON.parseObject:", e);
+        console.log("[Frida] Error hooking fastjson:", e);
     }
 });
 ```
-
-This sends the full JSON to the host whenever an ApiResponeBean is parsed.
 
 ## 8.2 Run the Hook from Frida CLI
 
@@ -903,67 +914,17 @@ Log in and go to the home / device list screen as usual.
 
 ## 8.3 View the JSON Responses
 
-Each time ApiResponeBean is parsed, the script calls:
-
-```
-send({
-    type: "apiResp",
-    className: clsName,
-    json: text
-});
-```
-
 In the Frida CLI output you’ll see messages like:
 
 ```
-{"type":"send","payload":{"type":"apiResp","className":"com.thingclips.smart.android.network.bean.ApiResponeBean","json":"{...BIG_JSON...}"}}
-```
-
-You can:
-
-Copy the json":"{...}" part.
-
-Paste it into a JSON viewer / editor.
-
-Pretty-print it to inspect it.
-
-## 8.4 What to Look For (Device List + localKey)
-
-Among the many responses, you want those where:
-
-```"a": "m.life.my.group.device.list"```
-
-Inside that JSON, there is typically a result array with device objects, e.g. (simplified):
+==== Device list (m.life.my.group.device.list) ====
+Name: AC1 | devId: bf2bbc01412371b8942aao | localKey: ZwT(abcd][f07_Vc
+Name: AC2 | devId: bf76f639f1230b420aalmo | localKey: HkDbyabcdbiqI$Yr
+Name: AC3 | devId: bfa0a38a812380aa0d7a1n | localKey: !6LnGCabcdsfeQ9?
+==================================================
 
 ```
-{
-  "result": [
-    {
-      "devId": "bf2bbc01432571b8942uho",
-      "localKey": "ZwT(dbeE]1207_Vc",
-      "name": "Air Conditioner",
-      "ip": "19.116.21.102",
-      "uuid": "5f09cf760b9cd0f9",
-      "productId": "ki8abfgln4acdq8f"
-    }
-  ],
-  "a": "m.life.my.group.device.list",
-  "success": true,
-  "status": "ok"
-}
-```
 
-Key fields you care about:
-
-- devId → Tuya device ID
-
-- localKey → device local key (for LAN control)
-
-- name → friendly name
-
-- ip → public IP at last report
-
-- uuid, productId → extra identifiers (optional but useful)
 
 ## 8.5 STEP 8 Completion Checklist
 
@@ -977,18 +938,6 @@ runs successfully and prints:
 
 ```[Frida] Hooked fastjson.JSON.parseObject(String, Class)```
 
-While you use the app (home/device screen), Frida CLI prints send messages whose payload contains:
+And you have a complete list of your devices with the localKey ready to use :)
 
-- "className": "com.thingclips.smart.android.network.bean.ApiResponeBean"
 
-- "json": "{...}" where that JSON includes "a": "m.life.my.group.device.list"
-
-Inside those JSON blobs, you can clearly see for each device:
-
-- devId
-
-- localKey
-
-- name
-
-(and optionally ip, uuid, productId, etc.)

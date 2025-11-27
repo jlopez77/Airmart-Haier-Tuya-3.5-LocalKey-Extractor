@@ -28,108 +28,113 @@ which do not expose their local keys through Tuya IoT.
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+# 🚀 Quick Start (5 minutes)
 
-Prerequisites:
+**Prerequisites:**
+- Python **3.8+** installed and working.
 
-Python 3.8+ installed and working.
+---
 
-
-
-STEP 1 — Install Android Studio + ADB (Platform-Tools)
+# ✅ STEP 1 — Install Android Studio + ADB (Platform-Tools)
 
 This step ensures:
 
-- Android Studio installed
+- Android Studio installed  
+- Android SDK + Platform-Tools installed  
+- `adb` working globally on **macOS / Windows / Linux**
 
-- SDK + Platform-Tools installed
+---
 
-- adb works globally
+## 1. Download & Install Android Studio
 
-# 1. Download & Install Android Studio
+**macOS / Windows / Linux**
 
-- macOS / Windows / Linux
-Download from the official Android Studio website and install normally.
+- Download the installer from the official Android Studio website.
+- Install normally.
+- No custom configuration required at this stage.
 
-No custom configuration needed.
+---
 
-# 2. Open Android Studio and install SDK components
+## 2. Open Android Studio and Install SDK Components
 
-- Launch Android Studio.
+1. Launch **Android Studio**.
+2. On the welcome screen click:  
+   **More Actions → SDK Manager**  
+   *(If a project is open: File → Settings → Android SDK)*
 
-- On the welcome screen click:
-More Actions → SDK Manager (If a project is open: File → Settings → Android SDK)
+3. In **SDK Platforms**:
+   - Select **any Android version**, ideally **Android 11 or Android 12**.
+   - Click **Apply** → wait for the download to finish.
 
-- In SDK Platforms:
-
-Select any Android version, ideally Android 11 or 12.
-
-Click Apply → wait for download.
-
-- Go to SDK Tools tab:
-
-Check Android SDK Platform-Tools
-
-(Optional but recommended) check:
-
-- Android Emulator
-
-- Android SDK Build-Tools
-
-Click Apply → OK
+4. Go to **SDK Tools** tab:
+   - Enable **Android SDK Platform-Tools**
+   - *(Optional but recommended)* enable:
+     - **Android Emulator**
+     - **Android SDK Build-Tools**
+   - Click **Apply → OK**
 
 This installs:
 
-- adb
-
-- Emulator system
-
+- `adb`
+- Emulator system images
 - Essential build tools
 
-# 3. Ensure adb is available from terminal
+---
 
-- macOS / Linux:
+## 3. Ensure `adb` Is Available in the Terminal
 
-If Android Studio added it to PATH automatically, this works:
+### macOS / Linux
 
+Try:
+
+```bash
 adb version
+```
 
+If it works → you're done.
 
 If not, add platform-tools manually:
-
+```bash
 export PATH=$PATH:$HOME/Library/Android/sdk/platform-tools     # macOS
 export PATH=$PATH:$HOME/Android/Sdk/platform-tools             # Linux
-
-
+```
 To make it persistent:
-
+```bash
 echo 'export PATH=$PATH:$HOME/Library/Android/sdk/platform-tools' >> ~/.zshrc
 source ~/.zshrc
+```
 
-- Windows:
+### Windows
 
-Check:
+Test in PowerShell or CMD:
 
+```powershell
 adb version
+```
 
+If it prints the version → done.
 
-If it fails, add this to PATH:
-
+If it says "adb is not recognized" then add the following folder to your PATH:
+```bash
 C:\Users\<YOUR_USER>\AppData\Local\Android\Sdk\platform-tools
+```
 
-# 4. Verify ADB is working
+To add it permanently (PowerShell):
+```bash
+setx PATH "$Env:PATH;C:\Users\<YOUR_USER>\AppData\Local\Android\Sdk\platform-tools"
+```
 
-Run:
-
+Now close/open the terminal and test again:
+```
 adb version
+```
 
-
-Expected output:
-
+If it prints something like:
+```
 Android Debug Bridge version x.y.z
+```
 
-
-## If you see this → Step 1 is fully complete ✔️
+→ ADB is successfully installed.
 
 
 

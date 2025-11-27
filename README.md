@@ -433,7 +433,262 @@ frida-ps -U
 
 ---
 
+# ✅ STEP 5 — Install the **com.aircondition.smart** App in the Emulator
+
+Now we need the **exact same app** you use on your phone:  
+`com.aircondition.smart` (the Intelligent Air / ThingClips-based AC app).
+
+The goal: have it running **inside the emulator**, so Frida can hook it.
+
+---
+
+## 5.1 Get the APK (high-level options)
+
+You need an APK file named something like:
+
+- `com.aircondition.smart.apk`
+
+There are several ways to obtain it (you only need **one**):
+
+1. **From your physical Android phone (recommended)**
+   - Use an APK extractor app (e.g. “APK Extractor” from Play Store).
+   - Extract the **Intelligent Air** / `com.aircondition.smart` app.
+   - Transfer the resulting `.apk` file to your PC (via USB, email, cloud, etc.).
+
+2. **From a trusted APK repository**
+   - Search for `com.aircondition.smart` on a reputable APK site.
+   - Download the APK and verify it’s the correct package name.
+
+> 🔴 Important: Make sure the APK is **exactly** `com.aircondition.smart`,  
+> otherwise Frida hooks we write later won’t match.
+
+Place the APK somewhere convenient, e.g.:
+
+- macOS / Linux: `~/Downloads/com.aircondition.smart.apk`
+- Windows: `C:\Users\<YOU>\Downloads\com.aircondition.smart.apk`
+
+---
+
+## 5.2 Install the APK into the Emulator
+
+With the emulator **running** and ADB working, install the APK:
+
+### macOS / Linux
+
+From the folder where the APK lives, or with full path:
+
+```
+adb install com.aircondition.smart.apk
+```
+
+Or:
+
+```
+adb install ~/Downloads/com.aircondition.smart.apk
+```
+
+In PowerShell or CMD:
+
+```
+adb install C:\Users<YOU>\Downloads\com.aircondition.smart.apk
+```
+
+If the app was previously installed, you may need:
+
+```
+adb install -r com.aircondition.smart.apk
+```
+
+Expected output:
+```
+Performing Streamed Install
+Success
+```
+
+## 5.3 Verify the Package Is Installed
+
+Run:
+
+```
+adb shell pm list packages | grep aircondition
+```
+
+On Windows (PowerShell):
+
+```
+adb shell pm list packages | findstr aircondition
+```
+
+You should see:
+
+```
+package:com.aircondition.smart
+```
+
+---
+
+## 5.4 (Optional) Launch the App Manually
+
+You can start it from the emulator’s app drawer,  
+or via ADB:
+
+```
+adb shell monkey -p com.aircondition.smart -c android.intent.category.LAUNCHER 1
+```
+
+You should see the app UI appear in the emulator.
+
+---
+
+🎉 **STEP 5 is complete when:**
+
+- `adb install` finishes with `Success`
+- `adb shell pm list packages` shows `com.aircondition.smart`
+- You can open the app in the emulator
+
+---
+
+# ✅ STEP 6 — First Frida Hook into `com.aircondition.smart`
+
+Goal:  
+Verify that we can **inject code** into the app process and see our own log messages.
+
+We’ll:
+
+1. Write a tiny Frida script (`test-hook.js`)
+2. Run it against `com.aircondition.smart`
+3. Confirm we see output from inside the app
+
+---
+
+## 6.1 Create a Simple Frida Script
+
+On your PC, create a file named:
+
+`test-hook.js`
+
+With this content:
+
+```
+Java.perform(function () {
+    console.log("[Frida] test-hook.js loaded inside com.aircondition.smart");
+
+    // As a smoke test, print the app's main Application class if any
+    try {
+        var appClass = Java.use("android.app.Application");
+        console.log("[Frida] Application class found:", appClass.$className);
+    } catch (e) {
+        console.log("[Frida] Could not access Application:", e);
+    }
+});
+```
+
+This just confirms:
+
+- Java VM is accessible
+
+- Our code runs inside the app
+
+## 6.2 Run the Hook with Frida (spawn the app)
+
+Make sure:
+
+- The emulator is running
+- `frida-server` is running (`frida-ps -U` shows processes)
+
+Then run:
+
+```
+frida -U -f com.aircondition.smart -l test-hook.js
+```
+
+Explanation:
+
+- -U → use USB / emulator device (our emulator)
+
+- -f com.aircondition.smart → spawn this app
+
+- -l test-hook.js → load our script into it
 
 
+## 6.3 Expected Output
+
+If the hook is successful, your terminal should display something like:
+
+```
+[Frida] test-hook.js loaded inside com.aircondition.smart
+[Frida] Application class found: android.app.Application
+```
+
+The second line may vary or may show an error — that’s fine.  
+The **important part** is that the first line appears, meaning:
+
+- The script was injected
+- Java.perform() executed inside the target app
+- Frida is working end-to-end
+
+You should also see the app launching inside the emulator.
+
+---
+
+## 6.4 If It Fails (common issues)
+
+### **Problem:**  
+
+```
+Failed to spawn: unable to connect to remote frida-server
+```
+
+**Fix:**  
+- Ensure frida-server is running:
+
+```
+adb shell ps | grep frida
+```
+
+- If not, start it again:
+
+```
+adb shell /data/local/tmp/frida-server &
+```
+
+---
+
+### **Problem:**  
+
+```
+Frida: Process terminated
+```
+
+**Fix:**
+- Try running the command again.  
+  Some OEM-based apps crash during the first spawn but succeed on the second try.
+
+---
+
+### **Problem:**  
+```
+`frida-ps -U` does not list processes
+```
+
+
+**Fix:**
+
+```
+adb kill-server
+adb start-server
+adb shell /data/local/tmp/frida-server &
+frida-ps -U
+```
+
+---
+
+Once the hook prints:
+
+```
+[Frida] test-hook.js loaded inside com.aircondition.smart
+```
+
+🎉 **STEP 6 is fully complete.**
 
 

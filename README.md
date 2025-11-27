@@ -23,8 +23,8 @@ which do not expose their local keys through Tuya IoT.
   - Gree OEM units with Tuya WiFi
   - “Thingclips Platform” devices
   - Tuya 3.3 and 3.4 (legacy)
-- 100% offline, reproducible and cross-platform.
-- Produces ready-to-use YAML for Home Assistant (Tuya Local).
+
+- DeviceId & LocalKey ready to use with Tuya Local (please use a static IP in your router for the devices)
 
 ---
 

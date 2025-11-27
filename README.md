@@ -9,8 +9,10 @@ No MITM.
 No firmware hacking.  
 No cloud access needed.
 
-This method works even for **devices locked to the Haier/Thingclips cloud**
-which do not expose their local keys through Tuya IoT.
+This method works for **devices locked to the Haier/Thingclips cloud** which do not expose their local keys through Tuya IoT.
+Probably will work with other apps that use ThingClips with little or no modification. 
+
+**USE AT YOUR OWN RISK**
 
 ---
 

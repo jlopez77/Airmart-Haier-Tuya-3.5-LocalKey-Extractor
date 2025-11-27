@@ -955,15 +955,15 @@ Inside that JSON, there is typically a result array with device objects, e.g. (s
 
 Key fields you care about:
 
-devId → Tuya device ID
+- devId → Tuya device ID
 
-localKey → device local key (for LAN control)
+- localKey → device local key (for LAN control)
 
-name → friendly name
+- name → friendly name
 
-ip → public IP at last report
+- ip → public IP at last report
 
-uuid, productId → extra identifiers (optional but useful)
+- uuid, productId → extra identifiers (optional but useful)
 
 ## 8.5 STEP 8 Completion Checklist
 

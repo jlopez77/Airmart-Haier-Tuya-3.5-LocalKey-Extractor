@@ -1,6 +1,6 @@
 # Airmart / Haier Tuya 3.5 LocalKey Extractor
 
-Extract the **Device ID** and **LocalKey** from any **Tuya 3.5** WiFi device
+Extract the **Device ID** and **LocalKey** from Intelligent Air APP **Tuya 3.5** WiFi device
 (Airmart, Haier, Gree-Tuya, TCL, Galanz, Midea OEM, etc.)
 using a reproducible **Frida + Android emulator** method.
 
@@ -28,7 +28,7 @@ which do not expose their local keys through Tuya IoT.
 
 ---
 
-# 🚀 Quick Start (5 minutes)
+# 🚀 Quick Start (10 minutes)
 
 **Prerequisites:**
 - Python **3.8+** installed and working.
@@ -691,4 +691,142 @@ Once the hook prints:
 
 🎉 **STEP 6 is fully complete.**
 
+# ✅ STEP 7 — Hook `ThingApiParams.putPostData` to Inspect Outgoing API Calls
+
+Goal:  
+See the **logical request data** the app sends to Tuya/ThingClips (before crypto/signing).  
+This includes things like:
+
+- `apiName` (e.g. `smartlife.m.user.email.password.login`)
+- Keys like `email`, `passwd`, `gid`, etc.
+
+We’ll hook `com.thingclips.smart.android.network.ThingApiParams.putPostData(...)`.
+
+---
+
+## 7.1 Create `hook_thingapiparams.js`
+
+On your PC, create a file:
+
+`hook_thingapiparams.js`
+
+With this content:
+
+```
+Java.perform(function () {
+    try {
+        var ThingApiParams = Java.use("com.thingclips.smart.android.network.ThingApiParams");
+
+        // Helper to safely get apiName
+        function getApiName(obj) {
+            try {
+                if (obj.apiName) {
+                    return obj.apiName.value;
+                }
+            } catch (e) {}
+            return "(unknown)";
+        }
+
+        // Overload 1: (String, Object) - very common
+        try {
+            ThingApiParams.putPostData.overload('java.lang.String', 'java.lang.Object')
+                .implementation = function (key, value) {
+                    var apiName = getApiName(this);
+                    console.log("[ThingApiParams.putPostData]");
+                    console.log("apiName =", apiName);
+                    console.log("key =", key, "value =", String(value));
+                    console.log("--------------------------------------------");
+                    return this.putPostData(key, value);
+                };
+            console.log("[Frida] Hooked ThingApiParams.putPostData(String, Object)");
+        } catch (e) {
+            console.log("[Frida] Could not hook putPostData(String, Object):", e);
+        }
+
+        // Overload 2: (String, JSONObject) - used by some APIs
+        try {
+            var JSONObject = Java.use("com.alibaba.fastjson.JSONObject");
+            ThingApiParams.putPostData.overload('java.lang.String', 'com.alibaba.fastjson.JSONObject')
+                .implementation = function (key, jsonObj) {
+                    var apiName = getApiName(this);
+                    console.log("[ThingApiParams.putPostData(JSON)]");
+                    console.log("apiName =", apiName);
+                    console.log("key =", key, "value(JSON) =", jsonObj.toJSONString());
+                    console.log("--------------------------------------------");
+                    return this.putPostData(key, jsonObj);
+                };
+            console.log("[Frida] Hooked ThingApiParams.putPostData(String, JSONObject)");
+        } catch (e) {
+            console.log("[Frida] Could not hook putPostData(String, JSONObject):", e);
+        }
+
+    } catch (e) {
+        console.log("[Frida] Error setting up ThingApiParams hook:", e);
+    }
+});
+```
+
+This will log every key/value added to the postData for each API call.
+
+## 7.2 Run the Hook Against `com.aircondition.smart`
+
+With the emulator and `frida-server` running, execute:
+
+```
+frida -U -f com.aircondition.smart -l hook_thingapiparams.js
+```
+
+You should see something like:
+
+```
+[Frida] Hooked ThingApiParams.putPostData(String, Object)
+[Frida] Hooked ThingApiParams.putPostData(String, JSONObject)
+```
+
+The app will launch inside the emulator.
+
+---
+
+## 7.3 Interact with the App (Login / Home Screen)
+
+Now, in the emulator:
+
+1. Open `com.aircondition.smart` (it should already be launched by Frida).
+2. Perform the **login** with your usual account.
+3. Wait until the app loads your “Home” / device list.
+
+While you do this, watch the terminal where Frida is running.  
+You should start seeing logs like:
+
+```
+[ThingApiParams.putPostData]
+apiName = smartlife.m.user.email.password.login
+key = email value = your_email@example.com
+[ThingApiParams.putPostData]
+apiName = smartlife.m.user.email.password.login
+key = passwd value = <long encrypted string>
+[ThingApiParams.putPostData]
+apiName = m.life.my.group.device.list
+key = gid value = 263074449
+```
+This confirms that:
+
+- The hook is active in `ThingApiParams`.
+- You see the **API name** (`apiName`) for each logical call.
+- You see all the **keys/values** for the POST body before encryption/signing.
+
+---
+
+## 7.4 STEP 7 Completion Checklist
+
+STEP 7 is **complete** when:
+
+- `frida -U -f com.aircondition.smart -l hook_thingapiparams.js` starts without errors.
+- The app opens in the emulator.
+- While you log in and navigate to the main/home screen, you see lines like:
+  - `apiName = smartlife.m.user.email.password.login`
+  - `apiName = m.life.my.group.device.list`
+- For each `apiName`, you see several `key = ... value = ...` lines.
+
+---
 

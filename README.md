@@ -819,7 +819,7 @@ This confirms that:
 
 ## 7.4 STEP 7 Completion Checklist
 
-STEP 7 is **complete** when:
+🎉  STEP 7 is **complete** when:
 
 - `frida -U -f com.aircondition.smart -l hook_thingapiparams.js` starts without errors.
 - The app opens in the emulator.
@@ -830,3 +830,165 @@ STEP 7 is **complete** when:
 
 ---
 
+# ✅ STEP 8 — Hook `fastjson.parseObject` to Dump Full JSON Responses (Device List + localKey)
+
+Goal:  
+Intercept the **decoded JSON** that the SDK parses from Tuya, especially:
+
+- `m.life.my.group.device.list` → devices + `localKey`, `devId`, `ip`, etc.
+
+We’ll hook `com.alibaba.fastjson.JSON.parseObject(String, Class)`.
+
+---
+
+## 8.1 Create `hook_fastjson.js`
+
+Create a file on your PC:
+
+`hook_fastjson.js`
+
+With this content:
+
+```
+Java.perform(function () {
+    try {
+        var JSONcls = Java.use("com.alibaba.fastjson.JSON");
+
+        JSONcls.parseObject.overload('java.lang.String', 'java.lang.Class')
+            .implementation = function (text, clazz) {
+                var clsName = "";
+                try {
+                    clsName = clazz.getName();
+                } catch (e) {}
+
+                // Only log relevant classes to avoid too much noise
+                if (clsName === "com.thingclips.smart.android.network.bean.ApiResponeBean") {
+                    // Send JSON to host (Python or CLI)
+                    send({
+                        type: "apiResp",
+                        className: clsName,
+                        json: text
+                    });
+                }
+
+                return this.parseObject(text, clazz);
+            };
+
+        console.log("[Frida] Hooked fastjson.JSON.parseObject(String, Class)");
+
+    } catch (e) {
+        console.log("[Frida] Error hooking fastjson.JSON.parseObject:", e);
+    }
+});
+```
+
+This sends the full JSON to the host whenever an ApiResponeBean is parsed.
+
+## 8.2 Run the Hook from Frida CLI
+
+With the emulator and `frida-server` running, execute:
+
+```
+frida -U -f com.aircondition.smart -l hook_fastjson.js
+```
+
+You should see:
+
+```
+[Frida] Hooked fastjson.JSON.parseObject(String, Class)
+```
+
+The app will launch inside the emulator.
+Log in and go to the home / device list screen as usual.
+
+## 8.3 View the JSON Responses
+
+Each time ApiResponeBean is parsed, the script calls:
+
+```
+send({
+    type: "apiResp",
+    className: clsName,
+    json: text
+});
+```
+
+In the Frida CLI output you’ll see messages like:
+
+```
+{"type":"send","payload":{"type":"apiResp","className":"com.thingclips.smart.android.network.bean.ApiResponeBean","json":"{...BIG_JSON...}"}}
+```
+
+You can:
+
+Copy the json":"{...}" part.
+
+Paste it into a JSON viewer / editor.
+
+Pretty-print it to inspect it.
+
+## 8.4 What to Look For (Device List + localKey)
+
+Among the many responses, you want those where:
+
+```"a": "m.life.my.group.device.list"```
+
+Inside that JSON, there is typically a result array with device objects, e.g. (simplified):
+
+```
+{
+  "result": [
+    {
+      "devId": "bf2bbc01432571b8942uho",
+      "localKey": "ZwT(dbeE]1207_Vc",
+      "name": "Air Conditioner",
+      "ip": "19.116.21.102",
+      "uuid": "5f09cf760b9cd0f9",
+      "productId": "ki8abfgln4acdq8f"
+    }
+  ],
+  "a": "m.life.my.group.device.list",
+  "success": true,
+  "status": "ok"
+}
+```
+
+Key fields you care about:
+
+devId → Tuya device ID
+
+localKey → device local key (for LAN control)
+
+name → friendly name
+
+ip → public IP at last report
+
+uuid, productId → extra identifiers (optional but useful)
+
+## 8.5 STEP 8 Completion Checklist
+
+STEP 8 is considered complete when:
+
+The command:
+
+```frida -U -f com.aircondition.smart -l hook_fastjson.js```
+
+runs successfully and prints:
+
+```[Frida] Hooked fastjson.JSON.parseObject(String, Class)```
+
+While you use the app (home/device screen), Frida CLI prints send messages whose payload contains:
+
+- "className": "com.thingclips.smart.android.network.bean.ApiResponeBean"
+
+- "json": "{...}" where that JSON includes "a": "m.life.my.group.device.list"
+
+Inside those JSON blobs, you can clearly see for each device:
+
+- devId
+
+- localKey
+
+- name
+
+(and optionally ip, uuid, productId, etc.)

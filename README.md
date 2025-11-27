@@ -335,7 +335,7 @@ Example output:
 16.5.6
 ```
 
-2. Go to the official Frida releases page.
+2. Go to the official Frida releases page. (https://github.com/frida/frida/releases)
 
 3. Download the file:
 

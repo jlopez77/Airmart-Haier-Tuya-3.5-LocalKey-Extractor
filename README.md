@@ -134,47 +134,69 @@ If it prints something like:
 Android Debug Bridge version x.y.z
 ```
 
-→ ADB is successfully installed.
+
+## → ADB is successfully installed.
 
 
 
 
+# ✅ STEP 2 — Install Frida on the Host (macOS / Windows / Linux)
 
+In this step we install **Frida CLI** and **Frida Python bindings** on your computer.
 
-2. Create an Android 13 ARM64 emulator
-3. Install the official Haier/Airmart app (Intelligent Air for the Airmart ACs)
-4. Install Frida-Server in the emulator
-5. Run:
+We’ll need:
 
-python extractor/extract_localkeys.py
+- `frida` (the core)
+- `frida-tools` (CLI commands like `frida-ps`)
 
-Example output:
-
-[KEY] bf2bbc01486531b8942uho = ZwT(dgeE][f07_Vc
-
-[KEY] bf76f636ff6f0b420fllmo = HyDbylnt7biqI$Yr
-
-[KEY] bfa0a38a8dd580dcd7a1n = !6LnGCaT'bsfeQ9?
-
-Copy these into Home Assistant → Tuya Local (https://github.com/make-all/tuya-local) → and the device works 100% LAN only.
+Later, we’ll match this version with `frida-server` on the Android side.
 
 ---
 
-## 📁 Project Structure
+## 2.1 Install Frida via `pip`
 
-extractor/
+**Same commands on macOS / Windows / Linux**  
+(Use `python` instead of `python3` if that’s your default.)
 
-hook_localkeys.js # Frida script that hooks DeviceBean.getLocalKey()
+```bash
+python3 -m pip install --upgrade frida frida-tools
+```
 
-extract_localkeys.py # Automated runner
+If you are using a virtualenv, activate it first, then run the same command.
 
-frida_launcher.py # Utility to launch frida-server + inject the script
+## 2.2 Verify Frida Installation
 
-adb_helpers.py # ADB utilities
+### 1) Check Frida CLI
 
+Run this in your terminal:
+
+```
+frida --version
+```
+
+You should see a version number, for example:
+
+```
+16.5.6
+```
+
+**Important:**  
+Remember this version. You must download **the same version** of `frida-server` later.
 
 ---
 
-## 📝 License
+### 2) Check Frida Python bindings
 
-MIT License.
+Run:
+
+```
+python3 -c "import frida; print(frida.version)"
+```
+
+You should see the same (or very close) version number.
+
+If both checks return a version number →  
+🎉 **STEP 2 is fully complete.**
+
+
+
